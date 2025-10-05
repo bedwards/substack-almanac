@@ -507,6 +507,18 @@
                 post.wordCount >= minWords && post.readTime >= minReadTime
             );
 
+            // Tag each post with category
+            const categories = categorize(filtered);
+            filtered.forEach(post => {
+                for (const [cat, posts] of Object.entries(categories)) {
+                    if (posts.includes(post)) {
+                        post.category = cat;
+                        break;
+                    }
+                }
+            });
+
+            // Sort all posts together
             switch(sortBy) {
                 case 'date':
                     filtered.sort((a, b) => b.date - a.date);
@@ -533,26 +545,7 @@
                 return;
             }
 
-            const categories = categorize(posts);
-            let html = '';
-
-            for (const [category, categoryPosts] of Object.entries(categories)) {
-                if (categoryPosts.length === 0) continue;
-
-                html += `
-                    <div class="category-section">
-                        <div class="category-header">
-                            <div class="category-title">${category}</div>
-                            <div class="category-count">${categoryPosts.length} posts</div>
-                        </div>
-                        <div class="posts-grid">
-                            ${categoryPosts.map(post => renderPost(post)).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            content.innerHTML = html;
+            content.innerHTML = `<div class="posts-grid">${posts.map(post => renderPost(post)).join('')}</div>`;
         }
 
         function renderPost(post) {
@@ -565,7 +558,7 @@
                 <div class="post-card">
                     <div class="post-header">
                         <div class="post-meta">
-                            <div class="publication">${escapeHtml(post.publicationName)}</div>
+                            <div class="publication">${escapeHtml(post.publicationName)} • ${post.category || ''}</div>
                             <div class="author">by ${escapeHtml(post.author)}</div>
                         </div>
                     </div>
