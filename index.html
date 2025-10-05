@@ -302,16 +302,19 @@
                 let loaded = 0;
                 const total = feeds.length;
 
-                for (const feedUrl of feeds) {
-                    try {
-                        await loadFeed(feedUrl);
-                        loaded++;
-                        document.getElementById('loadingText').textContent = 
-                            `Loading feeds... ${loaded}/${total}`;
-                    } catch (err) {
-                        console.error(`Failed to load ${feedUrl}:`, err);
-                    }
-                }
+                await Promise.all(
+                    feeds.map(async (feedUrl) => {
+                        try {
+                            await loadFeed(feedUrl);
+                        } catch (err) {
+                            console.error(`Failed to load ${feedUrl}:`, err);
+                        } finally {
+                            loaded++;
+                            document.getElementById('loadingText').textContent = 
+                                `Loading feeds... ${loaded}/${total}`;
+                        }
+                    })
+                );
 
                 document.getElementById('loading').style.display = 'none';
                 applyFilters();
