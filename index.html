@@ -401,6 +401,24 @@
         }
 
         function getTextContent(element, selector) {
+            // Handle namespace selectors
+            if (selector.includes(':')) {
+                const elements = element.getElementsByTagName(selector);
+                if (elements.length > 0) return elements[0].textContent.trim();
+            }
+            
+            // Handle space-separated selectors like 'author name'
+            if (selector.includes(' ')) {
+                const parts = selector.split(' ');
+                let current = element;
+                for (const part of parts) {
+                    const found = current.querySelector(part);
+                    if (!found) return '';
+                    current = found;
+                }
+                return current.textContent.trim();
+            }
+            
             const el = element.querySelector(selector);
             return el ? el.textContent.trim() : '';
         }
